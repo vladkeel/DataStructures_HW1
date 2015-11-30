@@ -14,9 +14,9 @@ namespace AVL{
 		else if (size == 1){
 			return new Node<N, M>();
 		}
-		Node<S, T>* newNode = new Node<N, M>();
-		int leftHeight = newNode->left ? newNode->left->getHeight() : 0;
-		int rightHeight = newNode->right ? newNode->right->getHeight() : 0;
+		Node<N, M>* newNode = new Node<N, M>();
+		newNode->left = buildEmpty(std::ceil((size-1)/2));
+		newNode->right = buildEmpty(std::floor((size - 1) / 2));
 		newNode->updateHeight();
 		return newNode;
 	}
@@ -100,7 +100,7 @@ namespace AVL{
 		}
 	public:
 		Node() :left(0), right(0), height(0), key(), data(){};
-		Node(S& key, const T& data) :key(key), data(data), left(0), right(0), height(0){};
+		Node(const S& key, const T& data) :key(key), data(data), left(0), right(0), height(0){};
 		Node(const Node<S, T>& copyN) :key(copyN.key), data(copyN.data), height(0), left(0), right(0){};
 		Node<S, T>& operator=(const Node<S, T>& copyN){
 			if (this != &copyN){

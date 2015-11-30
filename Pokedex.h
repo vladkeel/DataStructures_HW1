@@ -37,14 +37,25 @@ namespace Pokedex{
 			}
 		}
 	};
-	template <class S, class T> class PutNodesInArray{
+	class PutNodesInArray{
 	private:
-		AVL::Node<S, T>* nodesArray;
+		AVL::Node<Key, Pokemon>* nodesArray;
 	public:
-		PutNodesInArray(AVL::Node<S, T>* nodesArray) :nodesArray(nodesArray){};
-		void operator()(AVL::Node<S, T>& node){
+		PutNodesInArray(AVL::Node<Key, Pokemon>* nodesArray) :nodesArray(nodesArray){};
+		void operator()(AVL::Node<Key, Pokemon>& node){
 			static int c = 0;
 			nodesArray[c++] = node;
+		}
+	};
+	class PutNodesInTree{
+	private:
+		AVL::Node<Key, Pokemon>* nodesArray;
+	public:
+		PutNodesInTree(AVL::Node<Key, Pokemon>* nodesArray) :nodesArray(nodesArray){};
+		void operator()(AVL::Node<Key, Pokemon>& node){
+			static int s = 0;
+			node = AVL::Node<Key, Pokemon>(nodesArray[s].getKey(), nodesArray[s].getData());
+			++s;
 		}
 	};
 	static void updateLevelTree(AVL::Tree<Key, Pokemon>* tree, int stoneCode, int stoneFactor){
@@ -52,7 +63,7 @@ namespace Pokedex{
 		AVL::Node<Key, Pokemon>* pokemonArray = (AVL::Node<Key, Pokemon>*)malloc(size*sizeof(*pokemonArray));
 		if (!pokemonArray)
 			throw std::bad_alloc();
-		tree->inorderScan(PutNodesInArray<Key, Pokemon>(pokemonArray));
+		tree->inorderScan(PutNodesInArray(pokemonArray));
 		AVL::Node<Key, Pokemon>* changeArray = (AVL::Node<Key, Pokemon>*)malloc(size*sizeof(*pokemonArray));
 		if (!changeArray)
 			throw std::bad_alloc();
