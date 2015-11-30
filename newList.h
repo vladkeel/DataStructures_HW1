@@ -74,6 +74,9 @@ namespace LinkedList{
 	~List(){
 		clear();
 	}
+	Node<T>* begin(){
+		return head;
+	}
 	void insert(const T& data){
 		if(!head){
 			head = new Node<T>(data);

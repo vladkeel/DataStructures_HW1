@@ -15,15 +15,15 @@ namespace AVL{
 			return new Node<N, M>();
 		}
 		Node<N, M>* newNode = new Node<N, M>();
-		newNode->left = buildEmpty(std::ceil((size-1)/2));
-		newNode->right = buildEmpty(std::floor((size - 1) / 2));
+		newNode->left = buildEmpty<N,M>((int)std::ceil((size-1)/2));
+		newNode->right = buildEmpty<N,M>((int)std::floor((size - 1) / 2));
 		newNode->updateHeight();
 		return newNode;
 	}
 	template <class S, class T> class Node{
 	private:
 		template <class F, class U> friend class Tree;
-		template <class N, class M> friend Node* buildEmpty(int size);
+		template <class N, class M> friend Node<N,M>* buildEmpty(int size);
 		S key;
 		T data;
 		int height;
@@ -128,6 +128,12 @@ namespace AVL{
 		}
 		T& getData(){
 			return data;
+		}
+		void setKey(const S& other){
+			key = other;
+		}
+		void setData(const T& other){
+			data = other;
 		}
 		Node* insert(S& k, const T& data) {
 			if (k < key){

@@ -54,7 +54,8 @@ namespace Pokedex{
 		PutNodesInTree(AVL::Node<Key, Pokemon>* nodesArray) :nodesArray(nodesArray){};
 		void operator()(AVL::Node<Key, Pokemon>& node){
 			static int s = 0;
-			node = AVL::Node<Key, Pokemon>(nodesArray[s].getKey(), nodesArray[s].getData());
+			node.setKey(nodesArray[s].getKey());
+			node.setData(nodesArray[s].getData());
 			++s;
 		}
 	};
@@ -65,14 +66,23 @@ namespace Pokedex{
 			throw std::bad_alloc();
 		tree->inorderScan(PutNodesInArray(pokemonArray));
 		AVL::Node<Key, Pokemon>* changeArray = (AVL::Node<Key, Pokemon>*)malloc(size*sizeof(*pokemonArray));
-		if (!changeArray)
+		if (!changeArray){
+			free(pokemonArray);
 			throw std::bad_alloc();
+		}
 		AVL::Node<Key, Pokemon>* stayArray = (AVL::Node<Key, Pokemon>*)malloc(size*sizeof(*pokemonArray));
-		if (!stayArray)
+		if (!stayArray){
+			free(pokemonArray);
+			free(changeArray);
 			throw std::bad_alloc();
+		}
 		AVL::Node<Key, Pokemon>* newArray = (AVL::Node<Key, Pokemon>*)malloc(size*sizeof(*pokemonArray));
-		if (!newArray)
+		if (!newArray){
+			free(pokemonArray);
+			free(changeArray);
+			free(stayArray);
 			throw std::bad_alloc();
+		}
 		for (int i = 0, countChange = 0, countStay = 0; i < size; i++){
 			int id = pokemonArray[i].getKey().getPokemon();
 			int level = pokemonArray[i].getKey().getLevel();
@@ -97,6 +107,12 @@ namespace Pokedex{
 				++countChange;
 			}
 		}
+		AVL::Tree<Key, Pokemon> newTree(size);
+		*tree = newTree;
+		free(pokemonArray);
+		free(changeArray);
+		free(stayArray);
+		free(newArray);
 	}
 
 	class Pokedex{
@@ -187,6 +203,11 @@ namespace Pokedex{
 			}
 			pokemonTreeByID.inorderScan(UpdatePokemonLevels(stoneCode, stoneFactor));
 			updateLevelTree(&levelPokemonTree, stoneCode, stoneFactor);
+			for (LinkedList::Node<Trainer>* it = trainerList.begin(); it != NULL; it = it->getNext()){
+				it->getData().getPokemonTreeByID()->inorderScan(UpdatePokemonLevels(stoneCode, stoneFactor));
+				AVL::Tree<Key, Pokemon>* tLevelTree = it->getData().getlevelPokemonTree();
+				updateLevelTree(tLevelTree, stoneCode, stoneFactor);
+			}
 		}
 	};
 }

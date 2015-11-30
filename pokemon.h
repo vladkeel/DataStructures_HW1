@@ -5,8 +5,8 @@ private:
 	int pokemonID;
 	int level;
 	int trainerID;
-	Pokemon(){};
 public:
+	Pokemon():pokemonID(0),level(0),trainerID(0){};
 	Pokemon(int id, int lvl, int trn) : pokemonID(id), level(lvl), trainerID(trn){};
 	Pokemon(const Pokemon& pkmn) : pokemonID(pkmn.pokemonID), level(pkmn.level), trainerID(pkmn.trainerID){};
 	Pokemon& operator=(const Pokemon& pkmn){
