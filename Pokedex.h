@@ -124,6 +124,16 @@ namespace Pokedex{
 			return pokemonArray;
 		}
 		void EvolvePokemon(int pokemonID, int evolvedID);
+		void UpdateLevels(int stoneCode, int stoneFactor){
+			int size;
+			int* allPokemon = GetAllPokemonsByLevel(-1, &size);
+			int leavePokemon[size] = { 0 };
+			int updatePokemon[size] = { 0 };
+			int countLeave=0, countUpdate = 0;
+			for (int i = 0; i < size; i++){
+				if ()
+			}
+		}
 	};
 }
 #endif

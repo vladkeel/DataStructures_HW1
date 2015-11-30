@@ -75,12 +75,6 @@ namespace AVL{
 			return this; // no balance needed
 		}
 	protected:
-		Node<S, T>* findMin(){
-			return left ? left->findMin() : this;
-		}
-		Node<S, T>* findMax(){
-			return right ? right->findMax() : this;
-		}
 		void killNode(){
 			if (left)
 				left->killNode();
@@ -121,6 +115,12 @@ namespace AVL{
 		~Node<S, T>(){};
 		int getHeight()const{
 			return height;
+		}
+		Node<S, T>* findMin(){
+			return left ? left->findMin() : this;
+		}
+		Node<S, T>* findMax(){
+			return right ? right->findMax() : this;
 		}
 		int getKey()const{
 			return key;
