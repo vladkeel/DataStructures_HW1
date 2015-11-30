@@ -4,17 +4,6 @@
 #include "pokemon.h"
 #include "Key.h"
 #include "Exceptions.h"
-// this is how we do it
-//void removeFromLevel(AVL::Tree<Level>* levelTree, int levelNum, int pokemonID){
-//	AVL::Node<Level>* levelNode = levelTree->find(levelNum);
-//	if (!levelNode)
-//		throw ElementNotFound();
-//	AVL::Tree<Pokemon>* pokemonTree = levelNode->getData().getPokemonTreeByID(); // Place holder. need a getter for pokemon tree.
-//	pokemonTree->remove(pokemonID);
-//	if (pokemonTree->getSize() == 0){
-//		levelTree->remove(levelNum);
-//	}
-//}
 class Trainer{
 private:
 	int trainerID;
@@ -60,14 +49,14 @@ public:
 	AVL::Tree<int, Pokemon>* getPokemonTreeByID(){
 		return &pokemonTreeByID;
 	}
-	AVL::Tree<Key, Pokemon>* getPevelPokemonTree(){
+	AVL::Tree<Key, Pokemon>* getlevelPokemonTree(){
 		return &levelPokemonTree;
 	}
 	const AVL::Node<Key, Pokemon>* getMaxLevel()const{
 		return maxLevel;
 	}
 	void updateMaxLevel(){
-		maxLevel = levelPokemonTree.findMax();
+		maxLevel = levelPokemonTree.findMin();
 	}
 };
 #endif

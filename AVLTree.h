@@ -1,19 +1,22 @@
 #ifndef AVLTREE_H_
 #define AVLTREE_H_
 #include <algorithm>
+#include <stdlib.h>
 #include "Exceptions.h"
+#include <math.h>
 namespace AVL{
 	template <class N, class M>
 	static Node<N,M>* buildEmpty(int size){
 		if (size == 0){
-			return nullptr
+			return nullptr;
 		}
 		else if (size == 1){
 			return new Node<N, M>();
 		}
 		Node<S, T>* newNode = new Node<N, M>();
-		newNode->left = buildEmpty(std::ceil((size - 1) / 2));
-		NewNode->right = buildEmpty(std::floor((size - 1) / 2));
+		int leftHeight = newNode->left ? newNode->left->getHeight() : 0;
+		int rightHeight = newNode->right ? newNode->right->getHeight() : 0;
+		newNode->updateHeight();
 		return newNode;
 	}
 	template <class S, class T> class Node{
@@ -25,7 +28,6 @@ namespace AVL{
 		int height;
 		Node<S, T>* left;
 		Node<S, T>* right;
-		Node() :left(0), right(0),key(),data(){};
 		void updateHeight(){
 			int heightLeft = left ? left->height : -1;
 			int heightRight = right ? right->height : -1;
@@ -96,19 +98,17 @@ namespace AVL{
 			return newNode;
 		}
 	public:
+		Node() :left(0), right(0), height(0), key(), data(){};
 		Node(S& key, const T& data) :key(key), data(data), left(0), right(0), height(0){};
-		Node(const Node<S, T>& copyN) :key(copyN.key), data(copyN.data), height(copyN.height){
-			right = copyN.right ? copyN.right->copyNode() : 0;
-			left = copyN.left ? copyN.left->copyNode() : 0;
-		};
+		Node(const Node<S, T>& copyN) :key(copyN.key), data(copyN.data), height(0), left(0), right(0){};
 		Node<S, T>& operator=(const Node<S, T>& copyN){
 			if (this != &copyN){
 				killNode();
 				key = copyN.key;
 				data = copyN.data;
-				left = copyN.left->copyNode();
-				right = copyN.right->copyNode();
-				height = copyN.height;
+				left = 0;
+				right = 0;
+				height = 0;
 			}
 			return *this;
 		}
@@ -122,7 +122,7 @@ namespace AVL{
 		Node<S, T>* findMax(){
 			return right ? right->findMax() : this;
 		}
-		int getKey()const{
+		S& getKey()const{
 			return key;
 		}
 		T& getData()const{
