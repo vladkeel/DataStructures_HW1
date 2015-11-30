@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include "Exceptions.h"
 #include <math.h>
+#define nullptr NULL
+
 namespace AVL{
 	template <class S, class T> class Node;
 	template <class N, class M>
@@ -15,8 +17,8 @@ namespace AVL{
 			return new Node<N, M>();
 		}
 		Node<N, M>* newNode = new Node<N, M>();
-		newNode->left = buildEmpty<N,M>((int)std::ceil((size-1)/2));
-		newNode->right = buildEmpty<N,M>((int)std::floor((size - 1) / 2));
+		newNode->left = buildEmpty<N,M>((int)ceil((size-1)/2));
+		newNode->right = buildEmpty<N,M>((int)floor((size - 1) / 2));
 		newNode->updateHeight();
 		return newNode;
 	}
@@ -99,8 +101,8 @@ namespace AVL{
 			return newNode;
 		}
 	public:
-		Node() :left(0), right(0), height(0), key(), data(){};
-		Node(const S& key, const T& data) :key(key), data(data), left(0), right(0), height(0){};
+		Node() :  key(), data(), height(0),left(0), right(0){};
+		Node(const S& key, const T& data) :key(key), data(data),height(0), left(0), right(0) {};
 		Node(const Node<S, T>& copyN) :key(copyN.key), data(copyN.data), height(0), left(0), right(0){};
 		Node<S, T>& operator=(const Node<S, T>& copyN){
 			if (this != &copyN){
@@ -202,7 +204,7 @@ namespace AVL{
 		int size;
 	public:
 		Node<F,U>* root;
-		Tree() : root(0),size(0){};
+		Tree() : size(0), root(0){};
 		Tree(int size):size(size){
 			root = buildEmpty<F,U>(size);
 		}

@@ -114,14 +114,14 @@ namespace Pokedex{
 		free(newArray);
 	}
 
-	class Pokedex{
+	class PokedexDS{
 	private:
 		LinkedList::List<Trainer> trainerList;
 		AVL::Tree<int,Pokemon> pokemonTreeByID;
 		AVL::Tree<Key, Pokemon> pokemonLevelsTree;
 		AVL::Node<Key, Pokemon>* maxLevel;
-		Pokedex(const Pokedex&);
-		Pokedex& operator=(const Pokedex&);
+		PokedexDS(const PokedexDS&);
+		PokedexDS& operator=(const PokedexDS&);
 
 		void updateMaxLevel(){
 			maxLevel = pokemonLevelsTree.findMin();
@@ -131,12 +131,12 @@ namespace Pokedex{
 			(trainerList.find(IDequals(trainerID))).updateMaxLevel();
 		}
 	public:
-		Pokedex() :maxLevel(0){
+		PokedexDS() :maxLevel(0){
 			trainerList = LinkedList::List<Trainer>();
 			pokemonTreeByID = AVL::Tree<int, Pokemon>();
 			pokemonLevelsTree = AVL::Tree<Key, Pokemon>();
 		}
-		~Pokedex(){
+		~PokedexDS(){
 			if (maxLevel)
 				delete maxLevel;
 		}
@@ -156,15 +156,16 @@ namespace Pokedex{
 				const IDequals finder(trainerID);
 				trainer = trainerList.find(finder);
 			}
-			catch (DoesntExist e) {
+			catch (DoesntExist& e) {
 				throw Failure();
 			}
 			if (pokemonTreeByID.find(pokemonID) != nullptr)
 				throw Failure();
 			Pokemon pokemon(pokemonID, level, trainerID);
 			pokemonTreeByID.insert(pokemonID, pokemon);
-			pokemonLevelsTree.insert(Key(level, pokemonID), pokemon);
-			trainer.getlevelPokemonTree()->insert(Key(level, pokemonID), pokemon);
+			Key k(level, pokemonID);
+			pokemonLevelsTree.insert(k, pokemon);
+			trainer.getlevelPokemonTree()->insert(k, pokemon);
 			trainer.getPokemonTreeByID()->insert(pokemonID, pokemon);
 			updateMaxLevel();
 			trainer.updateMaxLevel();
@@ -233,7 +234,7 @@ namespace Pokedex{
 				try {
 					trainer = trainerList.find(IDequals(trainerID));
 				}
-				catch (LinkedList::DoesntExist e) {
+				catch (LinkedList::DoesntExist& e) {
 					throw Failure();
 				}
 				levelsTree = trainer.getlevelPokemonTree();

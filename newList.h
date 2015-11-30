@@ -74,9 +74,6 @@ namespace LinkedList{
 	~List(){
 		clear();
 	}
-	Node<T>* begin(){
-		return head;
-	}
 	void insert(const T& data){
 		if(!head){
 			head = new Node<T>(data);
@@ -108,6 +105,10 @@ namespace LinkedList{
 			}
 
 		}
+	}
+
+	Node<T>* begin(){
+		return head;
 	}
 	template<class Predicate>
 		T& find(const Predicate& predicate) {
