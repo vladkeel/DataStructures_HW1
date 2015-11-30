@@ -11,7 +11,7 @@ namespace Pokedex{
 		int trainerID;
 	public:
 		findTrainer(int trainerID) :trainerID(trainerID){};
-		bool operator()(Trainer& trainer){
+		const bool operator()(const Trainer& trainer) const{
 			return trainer.getID() == trainerID;
 		}
 	};
@@ -20,9 +20,9 @@ namespace Pokedex{
 		int* pokemonArray;
 	public:
 		PutPokemonInArray(int* pokemonArray) :pokemonArray(pokemonArray){};
-		void operator()(Pokemon& pokemon){
-			int static i = 0;
-			pokemonArray[i] = pokemon.getID();
+		void operator()(AVL::Node<Key, Pokemon>& node){
+			static int i = 0;
+			pokemonArray[i++] = node.getData().getID();
 		}
 	};
 	class UpdatePokemonLevels{
@@ -43,10 +43,51 @@ namespace Pokedex{
 	public:
 		PutNodesInArray(AVL::Node<S, T>* nodesArray) :nodesArray(nodesArray){};
 		void operator()(AVL::Node<S, T>& node){
-			int static c = 0;
-			nodesArray[c] = node;
+			static int c = 0;
+			nodesArray[c++] = node;
 		}
 	};
+	static void updateLevelTree(AVL::Tree<Key, Pokemon>* tree, int stoneCode, int stoneFactor){
+		const int size = tree->getSize();
+		AVL::Node<Key, Pokemon>* pokemonArray = (AVL::Node<Key, Pokemon>*)malloc(size*sizeof(*pokemonArray));
+		if (!pokemonArray)
+			throw std::bad_alloc();
+		tree->inorderScan(PutNodesInArray<Key, Pokemon>(pokemonArray));
+		AVL::Node<Key, Pokemon>* changeArray = (AVL::Node<Key, Pokemon>*)malloc(size*sizeof(*pokemonArray));
+		if (!changeArray)
+			throw std::bad_alloc();
+		AVL::Node<Key, Pokemon>* stayArray = (AVL::Node<Key, Pokemon>*)malloc(size*sizeof(*pokemonArray));
+		if (!stayArray)
+			throw std::bad_alloc();
+		AVL::Node<Key, Pokemon>* newArray = (AVL::Node<Key, Pokemon>*)malloc(size*sizeof(*pokemonArray));
+		if (!newArray)
+			throw std::bad_alloc();
+		for (int i = 0, countChange = 0, countStay = 0; i < size; i++){
+			int id = pokemonArray[i].getKey().getPokemon();
+			int level = pokemonArray[i].getKey().getLevel();
+			Pokemon pokemon = pokemonArray[i].getData();
+			if (id % stoneCode == 0){
+				pokemon.setLevel(level*stoneFactor);
+				changeArray[countChange] = AVL::Node<Key, Pokemon>(Key(level*stoneFactor, id), pokemon);
+				++countChange;
+			}
+			else {
+				stayArray[countStay] = AVL::Node<Key, Pokemon>(Key(level, id), pokemon);
+				++countStay;
+			}
+		}
+		for (int i = 0, countChange = 0, countStay = 0; i < size; i++){
+			if (stayArray[countStay].getKey() < changeArray[countChange].getKey()){
+				newArray[i] = stayArray[countStay];
+				++countStay;
+			}
+			else {
+				newArray[i] = changeArray[countChange];
+				++countChange;
+			}
+		}
+	}
+
 	class Pokedex{
 	private:
 		LinkedList::List<Trainer> trainerList;
@@ -74,7 +115,8 @@ namespace Pokedex{
 				throw InvalidInput();
 			Trainer trainer = Trainer();
 			try {
-				trainer = trainerList.find(findTrainer(trainerID));
+				const findTrainer finder(trainerID);
+				trainer = trainerList.find(finder);
 			}
 			catch (DoesntExist e) {
 				throw Failure();
@@ -125,50 +167,15 @@ namespace Pokedex{
 			levelsTree->inorderScan(PutPokemonInArray(pokemonArray));
 			return pokemonArray;
 		}
+
 		void EvolvePokemon(int pokemonID, int evolvedID);
+
 		void UpdateLevels(int stoneCode, int stoneFactor){
 			if (stoneCode < 1 || stoneFactor < 1){
 				throw InvalidInput();
 			}
 			pokemonTreeByID.inorderScan(UpdatePokemonLevels(stoneCode, stoneFactor));
-			const int size = levelPokemonTree.getSize();
-			AVL::Node<Key, Pokemon>* pokemonArray = (AVL::Node<Key, Pokemon>*)malloc(size*sizeof(*pokemonArray));
-			if (!pokemonArray)
-				throw std::bad_alloc();
-			levelPokemonTree.inorderScan(PutNodesInArray<Key,Pokemon>(pokemonArray));
-			AVL::Node<Key, Pokemon>* changeArray = (AVL::Node<Key, Pokemon>*)malloc(size*sizeof(*pokemonArray));
-			if (!changeArray)
-				throw std::bad_alloc();
-			AVL::Node<Key, Pokemon>* stayArray = (AVL::Node<Key, Pokemon>*)malloc(size*sizeof(*pokemonArray));
-			if (!stayArray)
-				throw std::bad_alloc();
-			AVL::Node<Key, Pokemon>* newArray = (AVL::Node<Key, Pokemon>*)malloc(size*sizeof(*pokemonArray));
-			if (!newArray)
-				throw std::bad_alloc();
-			for (int i = 0, countChange = 0, countStay = 0; i < size; i++){
-				int id = pokemonArray[i].getKey().getPokemon();
-				int level = pokemonArray[i].getKey().getLevel();
-				Pokemon pokemon = pokemonArray[i].getData();
-				if (id % stoneCode == 0){
-					pokemon.setLevel(level*stoneFactor);
-					changeArray[countChange] = AVL::Node<Key, Pokemon>(Key(level*stoneFactor, id), pokemon);
-					++countChange;
-				}
-				else {
-					stayArray[countStay] = AVL::Node<Key, Pokemon>(Key(level, id), pokemon);
-					++countStay;
-				}
-			}
-			for (int i = 0, countChange = 0, countStay = 0; i < size; i++){
-				if (stayArray[countStay].getKey() < changeArray[countChange].getKey()){
-					newArray[i] = stayArray[countStay];
-					++countStay;
-				}
-				else {
-					newArray[i] = changeArray[countChange];
-					++countChange;
-				}
-			}
+			updateLevelTree(&levelPokemonTree, stoneCode, stoneFactor);
 		}
 	};
 }

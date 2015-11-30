@@ -5,8 +5,9 @@
 #include "Exceptions.h"
 #include <math.h>
 namespace AVL{
+	template <class S, class T> class Node;
 	template <class N, class M>
-	static Node<N,M>* buildEmpty(int size){
+	Node<N,M>* buildEmpty(int size){
 		if (size == 0){
 			return nullptr;
 		}
@@ -22,7 +23,7 @@ namespace AVL{
 	template <class S, class T> class Node{
 	private:
 		template <class F, class U> friend class Tree;
-		template <class N, class M> friend Node* buildEmpty;
+		template <class N, class M> friend Node* buildEmpty(int size);
 		S key;
 		T data;
 		int height;
@@ -90,10 +91,10 @@ namespace AVL{
 			newNode->data = data;
 			newNode->height = height;
 			if (left){
-				newNode->left = left.copyNode();
+				newNode->left = left->copyNode();
 			}
 			if (right){
-				newNode->right = right.copyNode();
+				newNode->right = right->copyNode();
 			}
 			return newNode;
 		}
@@ -122,10 +123,10 @@ namespace AVL{
 		Node<S, T>* findMax(){
 			return right ? right->findMax() : this;
 		}
-		S& getKey()const{
+		const S& getKey()const{
 			return key;
 		}
-		T& getData()const{
+		T& getData(){
 			return data;
 		}
 		Node* insert(S& k, const T& data) {
@@ -175,17 +176,17 @@ namespace AVL{
 				return left->find(k);
 			return nullptr;
 		}
-		template <typename actionT> void inorderScan(actionT action)const{
+		template <typename actionT> void inorderScan(actionT action){
 			if (left)
 				left->inorderScan(action);
-			action(data);
+			action(*this);
 			if (right)
 				right->inorderScan(action);
 		}
-		template <typename actionT> void reverseInorderScan(actionT action)const{
+		template <typename actionT> void reverseInorderScan(actionT action){
 			if (right)
 				right->reverseInorderScan(action);
-			action(data);
+			action(*this);
 			if (left)
 				left->reverseInorderScan(action);
 		}
@@ -223,7 +224,7 @@ namespace AVL{
 			return size;
 		}
 		void insert(F& key, const U& data){
-			root = root ? root->insert(key, data) : new Node<U>(key,data);
+			root = root ? root->insert(key, data) : new Node<F,U>(key,data);
 			++size;
 		}
 		void remove(F& key){
