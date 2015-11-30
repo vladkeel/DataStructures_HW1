@@ -2,19 +2,19 @@
 #define TRAINER_H_
 #include "AVLTree.h"
 #include "pokemon.h"
-#include "Level.h"
+#include "Key.h"
 #include "Exceptions.h"
 // this is how we do it
-void removeFromLevel(AVL::Tree<Level>* levelTree, int levelNum, int pokemonID){
-	AVL::Node<Level>* levelNode = levelTree->find(levelNum);
-	if (!levelNode)
-		throw ElementNotFound();
-	AVL::Tree<Pokemon>* pokemonTree = levelNode->getData().getPokemonTreeByID(); // Place holder. need a getter for pokemon tree.
-	pokemonTree->remove(pokemonID);
-	if (pokemonTree->getSize() == 0){
-		levelTree->remove(levelNum);
-	}
-}
+//void removeFromLevel(AVL::Tree<Level>* levelTree, int levelNum, int pokemonID){
+//	AVL::Node<Level>* levelNode = levelTree->find(levelNum);
+//	if (!levelNode)
+//		throw ElementNotFound();
+//	AVL::Tree<Pokemon>* pokemonTree = levelNode->getData().getPokemonTreeByID(); // Place holder. need a getter for pokemon tree.
+//	pokemonTree->remove(pokemonID);
+//	if (pokemonTree->getSize() == 0){
+//		levelTree->remove(levelNum);
+//	}
+//}
 class Trainer{
 private:
 	int trainerID;
@@ -28,7 +28,7 @@ public:
 	}
 	Trainer(int id) : trainerID(id), maxLevel(0){
 		pokemonTreeByID = AVL::Tree<int, Pokemon>();
-		levelPokemonTree = AVL::Tree<Key, Level>();
+		levelPokemonTree = AVL::Tree<Key, Pokemon>();
 	}
 	Trainer(const Trainer& trn) : trainerID(trn.trainerID){
 		pokemonTreeByID = trn.pokemonTreeByID;
@@ -63,7 +63,7 @@ public:
 	AVL::Tree<Key, Pokemon>* getPevelPokemonTree(){
 		return &levelPokemonTree;
 	}
-	const AVL::Node<Key, Level>* getMaxLevel()const{
+	const AVL::Node<Key, Pokemon>* getMaxLevel()const{
 		return maxLevel;
 	}
 	void updateMaxLevel(){
