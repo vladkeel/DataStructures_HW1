@@ -6,13 +6,12 @@
 #include "newList.h"
 #include "Exceptions.h"
 namespace Pokedex{
-	class findTrainer{
-	private:
-		int trainerID;
+	class IDequals{
+		int ID;
 	public:
-		findTrainer(int trainerID) :trainerID(trainerID){};
-		const bool operator()(const Trainer& trainer) const{
-			return trainer.getID() == trainerID;
+		IDequals(int newID) : ID(newID) {};
+		bool operator()(const Trainer& trn) const{
+			return trn.getID()==ID;
 		}
 	};
 	class PutPokemonInArray{
@@ -119,30 +118,42 @@ namespace Pokedex{
 	private:
 		LinkedList::List<Trainer> trainerList;
 		AVL::Tree<int,Pokemon> pokemonTreeByID;
-		AVL::Tree<Key, Pokemon> levelPokemonTree;
+		AVL::Tree<Key, Pokemon> pokemonLevelsTree;
 		AVL::Node<Key, Pokemon>* maxLevel;
 		Pokedex(const Pokedex&);
 		Pokedex& operator=(const Pokedex&);
 
 		void updateMaxLevel(){
-			maxLevel = levelPokemonTree.findMin();
+			maxLevel = pokemonLevelsTree.findMin();
+		}
+		void updateMaxLevel(int trainerID){
+			maxLevel = pokemonLevelsTree.findMin();
+			(trainerList.find(IDequals(trainerID))).updateMaxLevel();
 		}
 	public:
 		Pokedex() :maxLevel(0){
 			trainerList = LinkedList::List<Trainer>();
 			pokemonTreeByID = AVL::Tree<int, Pokemon>();
-			levelPokemonTree = AVL::Tree<Key, Pokemon>();
+			pokemonLevelsTree = AVL::Tree<Key, Pokemon>();
 		}
 		~Pokedex(){
 			if (maxLevel)
 				delete maxLevel;
+		}
+		void addTrainer(int trainerID){
+			if(trainerID <= 0)
+				throw InvalidInput();
+			Trainer t(trainerID);
+			if(trainerList.isIn(t))
+				throw AlreadyExists();
+			trainerList.insert(t);
 		}
 		void catchPokemon(int pokemonID, int trainerID, int level){
 			if (pokemonID <= 0 || trainerID <= 0 || level <= 0)
 				throw InvalidInput();
 			Trainer trainer = Trainer();
 			try {
-				const findTrainer finder(trainerID);
+				const IDequals finder(trainerID);
 				trainer = trainerList.find(finder);
 			}
 			catch (DoesntExist e) {
@@ -152,14 +163,36 @@ namespace Pokedex{
 				throw Failure();
 			Pokemon pokemon(pokemonID, level, trainerID);
 			pokemonTreeByID.insert(pokemonID, pokemon);
-			levelPokemonTree.insert(Key(level, pokemonID), pokemon);
+			pokemonLevelsTree.insert(Key(level, pokemonID), pokemon);
 			trainer.getlevelPokemonTree()->insert(Key(level, pokemonID), pokemon);
 			trainer.getPokemonTreeByID()->insert(pokemonID, pokemon);
 			updateMaxLevel();
 			trainer.updateMaxLevel();
 		}
-		void freePokemon(int pokemonID){}
-		void levelUp(int pokemonID, int levelIncrease){
+	void freePokemon(int pokemonID){
+		if(pokemonID <= 0)
+			throw InvalidInput();
+		AVL::Node<int,Pokemon>* p = pokemonTreeByID.find(pokemonID);
+		if(!p)
+			throw Failure();
+		int levelTemp = (p->getData()).getLevel();
+		int trainerTemp = (p->getData()).getTrainer();
+
+		// removing from 2 main trees :
+
+		pokemonTreeByID.remove(pokemonID);
+
+		 Key temp(levelTemp, pokemonID);
+		 pokemonLevelsTree.remove(temp);
+
+		//removing from TrainersList
+
+		Trainer trainer = trainerList.find(IDequals(trainerTemp)); // has to be there
+		trainer.getPokemonTreeByID()->remove(pokemonID);
+		trainer.getlevelPokemonTree()->remove(temp);
+		updateMaxLevel(trainerTemp);
+	}
+	void levelUp(int pokemonID, int levelIncrease){
 			if (pokemonID <= 0 || levelIncrease <= 0)
 				throw InvalidInput();
 			AVL::Node<int,Pokemon>* pokemonNode = pokemonTreeByID.find(pokemonID);
@@ -170,17 +203,35 @@ namespace Pokedex{
 			freePokemon(pokemonID);
 			catchPokemon(pokemonID, trainerID, levelNum + levelIncrease);
 		}
-		int GetTopPokemon(int trainerID);
+	int getTopPokemon(int trainerID){
+		if( trainerID == 0)
+			throw InvalidInput();
+		else if(trainerID>0){
+			Trainer trainer(trainerID);
+				try{
+					trainer = trainerList.find(IDequals(trainerID));
+				} catch(const ElementNotFound&){
+					throw Failure();
+				}
+				if(!trainer.getMaxLevel())
+					return -1;
+				return ((trainer.getMaxLevel())->getData()).getID();//MaxLevel->getData() - type Pokemon
+			} else{
+				if(!maxLevel)
+					return -1;
+				return (maxLevel->getData()).getID();//MaxLevel->getData() - type Pokemon
+			}
+		}
 		int* GetAllPokemonsByLevel(int trainerID, int* numOfPokemon){
 			if (trainerID == 0)
 				throw InvalidInput();
 			AVL::Tree<Key,Pokemon>* levelsTree;
 			if (trainerID < 0)
-				levelsTree = &levelPokemonTree;
+				levelsTree = &pokemonLevelsTree;
 			else {
 				Trainer trainer = Trainer();
 				try {
-					trainer = trainerList.find(findTrainer(trainerID));
+					trainer = trainerList.find(IDequals(trainerID));
 				}
 				catch (LinkedList::DoesntExist e) {
 					throw Failure();
@@ -195,14 +246,23 @@ namespace Pokedex{
 			return pokemonArray;
 		}
 
-		void EvolvePokemon(int pokemonID, int evolvedID);
-
+	void evolvePokemon(int pokemonID, int evolvedID){
+		  if( pokemonID <= 0 || evolvedID <= 0 )
+		  		throw InvalidInput();
+		  if(!pokemonTreeByID.find(pokemonID) || pokemonTreeByID.find(evolvedID))
+		  		throw Failure();
+		  	Pokemon old = pokemonTreeByID.find(pokemonID)->getData();
+		  	int trainer = old.getTrainer();
+		  	int level = old.getLevel();
+		  	freePokemon(pokemonID);
+		  	catchPokemon(evolvedID, trainer, level);
+	}
 		void UpdateLevels(int stoneCode, int stoneFactor){
 			if (stoneCode < 1 || stoneFactor < 1){
 				throw InvalidInput();
 			}
 			pokemonTreeByID.inorderScan(UpdatePokemonLevels(stoneCode, stoneFactor));
-			updateLevelTree(&levelPokemonTree, stoneCode, stoneFactor);
+			updateLevelTree(&pokemonLevelsTree, stoneCode, stoneFactor);
 			for (LinkedList::Node<Trainer>* it = trainerList.begin(); it != NULL; it = it->getNext()){
 				it->getData().getPokemonTreeByID()->inorderScan(UpdatePokemonLevels(stoneCode, stoneFactor));
 				AVL::Tree<Key, Pokemon>* tLevelTree = it->getData().getlevelPokemonTree();

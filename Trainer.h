@@ -52,7 +52,7 @@ public:
 	AVL::Tree<Key, Pokemon>* getlevelPokemonTree(){
 		return &levelPokemonTree;
 	}
-	const AVL::Node<Key, Pokemon>* getMaxLevel()const{
+	AVL::Node<Key, Pokemon>* getMaxLevel()const{
 		return maxLevel;
 	}
 	void updateMaxLevel(){
