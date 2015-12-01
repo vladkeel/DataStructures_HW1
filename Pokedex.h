@@ -240,9 +240,10 @@ namespace Pokedex{
 			}
 			*numOfPokemon = levelsTree->getSize();
 			int* pokemonArray = (int*)malloc(*numOfPokemon*sizeof(*pokemonArray));
+			int* pokemonArrayCount = pokemonArray;
 			if (!pokemonArray)
 				throw std::bad_alloc();
-			levelsTree->inorderScan(PutPokemonInArray(pokemonArray++));
+			levelsTree->inorderScan(PutPokemonInArray(pokemonArrayCount++));
 			return pokemonArray;
 		}
 
