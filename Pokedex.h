@@ -20,8 +20,7 @@ namespace Pokedex{
 	public:
 		PutPokemonInArray(int* pokemonArray) :pokemonArray(pokemonArray){};
 		void operator()(AVL::Node<Key, Pokemon>& node){
-			static int i = 0;
-			pokemonArray[i++] = node.getData().getID();
+			*pokemonArray = node.getData().getID();
 		}
 	};
 	class UpdatePokemonLevels{
@@ -42,8 +41,7 @@ namespace Pokedex{
 	public:
 		PutNodesInArray(AVL::Node<Key, Pokemon>* nodesArray) :nodesArray(nodesArray){};
 		void operator()(AVL::Node<Key, Pokemon>& node){
-			static int c = 0;
-			nodesArray[c++] = node;
+			*nodesArray = node;
 		}
 	};
 	class PutNodesInTree{
@@ -52,10 +50,8 @@ namespace Pokedex{
 	public:
 		PutNodesInTree(AVL::Node<Key, Pokemon>* nodesArray) :nodesArray(nodesArray){};
 		void operator()(AVL::Node<Key, Pokemon>& node){
-			static int s = 0;
-			node.setKey(nodesArray[s].getKey());
-			node.setData(nodesArray[s].getData());
-			++s;
+			node.setKey((*nodesArray).getKey());
+			node.setData((*nodesArray).getData());
 		}
 	};
 	static void updateLevelTree(AVL::Tree<Key, Pokemon>* tree, int stoneCode, int stoneFactor){
@@ -63,7 +59,7 @@ namespace Pokedex{
 		AVL::Node<Key, Pokemon>* pokemonArray = (AVL::Node<Key, Pokemon>*)malloc(size*sizeof(*pokemonArray));
 		if (!pokemonArray)
 			throw std::bad_alloc();
-		tree->inorderScan(PutNodesInArray(pokemonArray));
+		tree->inorderScan(PutNodesInArray(pokemonArray++));
 		AVL::Node<Key, Pokemon>* changeArray = (AVL::Node<Key, Pokemon>*)malloc(size*sizeof(*pokemonArray));
 		if (!changeArray){
 			free(pokemonArray);
@@ -107,6 +103,7 @@ namespace Pokedex{
 			}
 		}
 		AVL::Tree<Key, Pokemon> newTree(size);
+		newTree.inorderScan(PutNodesInTree(pokemonArray++));
 		*tree = newTree;
 		free(pokemonArray);
 		free(changeArray);
@@ -245,7 +242,7 @@ namespace Pokedex{
 			int* pokemonArray = (int*)malloc(*numOfPokemon*sizeof(*pokemonArray));
 			if (!pokemonArray)
 				throw std::bad_alloc();
-			levelsTree->inorderScan(PutPokemonInArray(pokemonArray));
+			levelsTree->inorderScan(PutPokemonInArray(pokemonArray++));
 			return pokemonArray;
 		}
 
