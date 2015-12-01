@@ -184,10 +184,12 @@ namespace AVL{
 				return left->find(k);
 			return nullptr;
 		}
-		template <typename actionT> void inorderScan(actionT action, int iterator){
-			if (left)
-				left->inorderScan(action, iterator++);
-			action(*this, iterator++);
+		template <typename actionT> void inorderScan(actionT action, int* iterator){
+			if (left){
+				left->inorderScan(action, iterator);
+			}
+			action(*this, iterator);
+			++(*iterator);
 			if (right)
 				right->inorderScan(action,iterator);
 		}
@@ -241,7 +243,7 @@ namespace AVL{
 		Node<F,U>* findMax(){
 			return root ? root->findMax() : 0;
 		}
-		template <typename actionT> void inorderScan(actionT action, int iterator)const{
+		template <typename actionT> void inorderScan(actionT action, int* iterator)const{
 			if (root)
 				root->inorderScan(action, iterator);
 		}

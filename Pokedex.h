@@ -19,8 +19,8 @@ namespace Pokedex{
 		int* pokemonArray;
 	public:
 		PutPokemonInArray(int* pokemonArray) :pokemonArray(pokemonArray){};
-		void operator()(AVL::Node<Key, Pokemon>& node, int iterator){
-			pokemonArray[iterator] = node.getData().getID();
+		void operator()(AVL::Node<Key, Pokemon>& node, int* iterator){
+			pokemonArray[*iterator] = node.getData().getID();
 		}
 	};
 	class UpdatePokemonLevels{
@@ -29,7 +29,7 @@ namespace Pokedex{
 		int stoneFactor;
 	public:
 		UpdatePokemonLevels(int stoneCode, int stoneFactor) : stoneCode(stoneCode), stoneFactor(stoneFactor){};
-		void operator()(AVL::Node<int, Pokemon>& node, int){
+		void operator()(AVL::Node<int, Pokemon>& node, int*){
 			if (node.getKey() % stoneCode == 0){
 				node.getData().setLevel(node.getData().getLevel() * stoneFactor);
 			}
@@ -40,8 +40,8 @@ namespace Pokedex{
 		AVL::Node<Key, Pokemon>** nodesArray;
 	public:
 		PutNodesInArray(AVL::Node<Key, Pokemon>** nodesArray) :nodesArray(nodesArray){};
-		void operator()(AVL::Node<Key, Pokemon>& node, int iterator){
-			nodesArray[iterator] = new AVL::Node<Key, Pokemon>(node);
+		void operator()(AVL::Node<Key, Pokemon>& node, int* iterator){
+			nodesArray[*iterator] = new AVL::Node<Key, Pokemon>(node);
 		}
 	};
 	class PutNodesInTree{
@@ -49,9 +49,9 @@ namespace Pokedex{
 		AVL::Node<Key, Pokemon>** nodesArray;
 	public:
 		PutNodesInTree(AVL::Node<Key, Pokemon>** nodesArray) :nodesArray(nodesArray){};
-		void operator()(AVL::Node<Key, Pokemon>& node, int iterator){
-			node.setKey((*nodesArray[iterator]).getKey());
-			node.setData((*nodesArray[iterator]).getData());
+		void operator()(AVL::Node<Key, Pokemon>& node, int* iterator){
+			node.setKey((*nodesArray[*iterator]).getKey());
+			node.setData((*nodesArray[*iterator]).getData());
 		}
 	};
 	static void updateLevelTree(AVL::Tree<Key, Pokemon>* tree, int stoneCode, int stoneFactor){
@@ -83,7 +83,8 @@ namespace Pokedex{
 			stayArray[i] = NULL;
 			newArray[i] = NULL;
 		}
-		tree->inorderScan(PutNodesInArray(pokemonArray), 0);
+		int iterator = 0;
+		tree->inorderScan(PutNodesInArray(pokemonArray), &iterator);
 		for (int i = 0, countChange = 0, countStay = 0; i < size; i++){
 			int level = (*pokemonArray[i]).getKey().getLevel();
 			int id = (*pokemonArray[i]).getKey().getPokemon();
@@ -117,7 +118,8 @@ namespace Pokedex{
 			}
 		}
 		AVL::Tree<Key, Pokemon> newTree(size);
-		newTree.inorderScan(PutNodesInTree(newArray),0);
+		iterator = 0;
+		newTree.inorderScan(PutNodesInTree(newArray),&iterator);
 		*tree = newTree;
 		for (int i = 0; i < size; i++){
 			delete pokemonArray[i];
@@ -226,15 +228,15 @@ namespace Pokedex{
 		if( trainerID == 0)
 			throw InvalidInput();
 		else if(trainerID>0){
-			Trainer trainer(trainerID);
+			Trainer* trainer;
 				try{
-					trainer = trainerList.find(IDequals(trainerID));
+					trainer = &trainerList.find(IDequals(trainerID));
 				} catch(const ElementNotFound&){
 					throw Failure();
 				}
-				if(!trainer.getMaxLevel())
+				if(!trainer->getMaxLevel())
 					return -1;
-				return ((trainer.getMaxLevel())->getData()).getID();//MaxLevel->getData() - type Pokemon
+				return ((trainer->getMaxLevel())->getData()).getID();//MaxLevel->getData() - type Pokemon
 			} else{
 				if(!maxLevel)
 					return -1;
@@ -259,11 +261,15 @@ namespace Pokedex{
 				levelsTree = trainer->getlevelPokemonTree();
 			}
 			*numOfPokemon = levelsTree->getSize();
+			if (*numOfPokemon == 0){
+				return NULL;
+			}
 			int* pokemonArray = (int*)malloc(*numOfPokemon*sizeof(*pokemonArray));
 			int* pokemonArrayCount = pokemonArray;
 			if (!pokemonArray)
 				throw std::bad_alloc();
-			levelsTree->inorderScan(PutPokemonInArray(pokemonArrayCount),0);
+			int iterator = 0;
+			levelsTree->inorderScan(PutPokemonInArray(pokemonArrayCount),&iterator);
 			return pokemonArray;
 		}
 
@@ -282,10 +288,11 @@ namespace Pokedex{
 			if (stoneCode < 1 || stoneFactor < 1){
 				throw InvalidInput();
 			}
-			pokemonTreeByID.inorderScan(UpdatePokemonLevels(stoneCode, stoneFactor),0);
+			int garbage = 0;
+			pokemonTreeByID.inorderScan(UpdatePokemonLevels(stoneCode, stoneFactor), &garbage);
 			updateLevelTree(&pokemonLevelsTree, stoneCode, stoneFactor);
 			for (LinkedList::Node<Trainer>* it = trainerList.begin(); it != NULL; it = it->getNext()){
-				it->getData().getPokemonTreeByID()->inorderScan(UpdatePokemonLevels(stoneCode, stoneFactor),0);
+				it->getData().getPokemonTreeByID()->inorderScan(UpdatePokemonLevels(stoneCode, stoneFactor),&garbage);
 				AVL::Tree<Key, Pokemon>* tLevelTree = it->getData().getlevelPokemonTree();
 				updateLevelTree(tLevelTree, stoneCode, stoneFactor);
 			}

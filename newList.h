@@ -4,15 +4,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "Exceptions.h"
 
 using namespace std;
 
 namespace LinkedList{
-
-	class ElementNotFound : public std::exception {} ;
-	class IsEmpty : public std::exception {} ;
-	class AlreadyExists : public std::exception {} ;
-	class DoesntExist : public std::exception {} ;
 
 	template <class S>
 	class Node{
@@ -86,7 +82,7 @@ namespace LinkedList{
 	}
 	void remove(const T& data){
 		if(!head)
-			throw IsEmpty();
+			throw IsEmptyException();
 		if(head->getData() == data){
 			Node<T>* r = head;
 			head = head->getNext() ? head->getNext() : NULL;
@@ -117,7 +113,7 @@ namespace LinkedList{
 						return p->getData();
 					}
 				}
-				throw DoesntExist();
+				throw ElementNotFound();
 			}
 
 		bool isIn(const T& data){
