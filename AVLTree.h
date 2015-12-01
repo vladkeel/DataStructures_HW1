@@ -184,19 +184,12 @@ namespace AVL{
 				return left->find(k);
 			return nullptr;
 		}
-		template <typename actionT> void inorderScan(actionT action){
+		template <typename actionT> void inorderScan(actionT action, int iterator){
 			if (left)
-				left->inorderScan(action);
-			action(*this);
+				left->inorderScan(action, iterator++);
+			action(*this, iterator++);
 			if (right)
-				right->inorderScan(action);
-		}
-		template <typename actionT> void reverseInorderScan(actionT action){
-			if (right)
-				right->reverseInorderScan(action);
-			action(*this);
-			if (left)
-				left->reverseInorderScan(action);
+				right->inorderScan(action,iterator);
 		}
 	};
 	template <class F,class U> class Tree{
@@ -248,13 +241,9 @@ namespace AVL{
 		Node<F,U>* findMax(){
 			return root ? root->findMax() : 0;
 		}
-		template <typename actionT> void inorderScan(actionT action)const{
+		template <typename actionT> void inorderScan(actionT action, int iterator)const{
 			if (root)
-				root->inorderScan(action);
-		}
-		template <typename actionT> void reverseInorderScan(actionT action)const{
-			if (root)
-				root->reverseInorderScan(action);
+				root->inorderScan(action, iterator);
 		}
 	};
 
