@@ -156,4 +156,5 @@ void Quit(void** DS){
 		return;
 	}
 	delete *DS;
+	*DS = NULL;
 }

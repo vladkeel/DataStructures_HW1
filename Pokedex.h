@@ -37,63 +37,77 @@ namespace Pokedex{
 	};
 	class PutNodesInArray{
 	private:
-		AVL::Node<Key, Pokemon>* nodesArray;
+		AVL::Node<Key, Pokemon>** nodesArray;
 	public:
-		PutNodesInArray(AVL::Node<Key, Pokemon>* nodesArray) :nodesArray(nodesArray){};
+		PutNodesInArray(AVL::Node<Key, Pokemon>** nodesArray) :nodesArray(nodesArray){};
 		void operator()(AVL::Node<Key, Pokemon>& node, int iterator){
-			nodesArray[iterator] = node;
+			nodesArray[iterator] = new AVL::Node<Key, Pokemon>(node);
 		}
 	};
 	class PutNodesInTree{
 	private:
-		AVL::Node<Key, Pokemon>* nodesArray;
+		AVL::Node<Key, Pokemon>** nodesArray;
 	public:
-		PutNodesInTree(AVL::Node<Key, Pokemon>* nodesArray) :nodesArray(nodesArray){};
+		PutNodesInTree(AVL::Node<Key, Pokemon>** nodesArray) :nodesArray(nodesArray){};
 		void operator()(AVL::Node<Key, Pokemon>& node, int iterator){
-			node.setKey((nodesArray[iterator]).getKey());
-			node.setData((nodesArray[iterator]).getData());
+			node.setKey((*nodesArray[iterator]).getKey());
+			node.setData((*nodesArray[iterator]).getData());
 		}
 	};
 	static void updateLevelTree(AVL::Tree<Key, Pokemon>* tree, int stoneCode, int stoneFactor){
 		const int size = tree->getSize();
-		AVL::Node<Key, Pokemon>* pokemonArray = (AVL::Node<Key, Pokemon>*)malloc(size*sizeof(*pokemonArray));
+		AVL::Node<Key, Pokemon>** pokemonArray = (AVL::Node<Key, Pokemon>**)malloc(size*sizeof(*pokemonArray));
 		if (!pokemonArray)
 			throw std::bad_alloc();
-		tree->inorderScan(PutNodesInArray(pokemonArray),0);
-		AVL::Node<Key, Pokemon>* changeArray = (AVL::Node<Key, Pokemon>*)malloc(size*sizeof(*pokemonArray));
+		AVL::Node<Key, Pokemon>** changeArray = (AVL::Node<Key, Pokemon>**)malloc(size*sizeof(*pokemonArray));
 		if (!changeArray){
 			free(pokemonArray);
 			throw std::bad_alloc();
 		}
-		AVL::Node<Key, Pokemon>* stayArray = (AVL::Node<Key, Pokemon>*)malloc(size*sizeof(*pokemonArray));
+		AVL::Node<Key, Pokemon>** stayArray = (AVL::Node<Key, Pokemon>**)malloc(size*sizeof(*pokemonArray));
 		if (!stayArray){
 			free(pokemonArray);
 			free(changeArray);
 			throw std::bad_alloc();
 		}
-		AVL::Node<Key, Pokemon>* newArray = (AVL::Node<Key, Pokemon>*)malloc(size*sizeof(*pokemonArray));
+		AVL::Node<Key, Pokemon>** newArray = (AVL::Node<Key, Pokemon>**)malloc(size*sizeof(*pokemonArray));
 		if (!newArray){
 			free(pokemonArray);
 			free(changeArray);
 			free(stayArray);
 			throw std::bad_alloc();
 		}
+		for (int i = 0; i < size; i++){
+			pokemonArray[i] = NULL;
+			changeArray[i] = NULL;
+			stayArray[i] = NULL;
+			newArray[i] = NULL;
+		}
+		tree->inorderScan(PutNodesInArray(pokemonArray), 0);
 		for (int i = 0, countChange = 0, countStay = 0; i < size; i++){
-			int id = pokemonArray[i].getKey().getPokemon();
-			int level = pokemonArray[i].getKey().getLevel();
-			Pokemon pokemon = pokemonArray[i].getData();
+			int level = (*pokemonArray[i]).getKey().getLevel();
+			int id = (*pokemonArray[i]).getKey().getPokemon();
+			Pokemon pokemon = (*pokemonArray[i]).getData();
 			if (id % stoneCode == 0){
 				pokemon.setLevel(level*stoneFactor);
-				changeArray[countChange] = AVL::Node<Key, Pokemon>(Key(level*stoneFactor, id), pokemon);
+				changeArray[countChange] = new AVL::Node<Key, Pokemon>(Key(level*stoneFactor, id), pokemon);
 				++countChange;
 			}
 			else {
-				stayArray[countStay] = AVL::Node<Key, Pokemon>(Key(level, id), pokemon);
+				stayArray[countStay] = new AVL::Node<Key, Pokemon>(Key(level, id), pokemon);
 				++countStay;
 			}
 		}
 		for (int i = 0, countChange = 0, countStay = 0; i < size; i++){
-			if (stayArray[countStay].getKey() < changeArray[countChange].getKey()){
+			if (!stayArray[countStay]){
+				newArray[i] = changeArray[countChange];
+				++countChange;
+			}
+			else if (!changeArray[countChange]){
+				newArray[i] = stayArray[countStay];
+				++countStay;
+			}
+			else if ((*stayArray[countStay]).getKey() < (*changeArray[countChange]).getKey()){
 				newArray[i] = stayArray[countStay];
 				++countStay;
 			}
@@ -103,8 +117,14 @@ namespace Pokedex{
 			}
 		}
 		AVL::Tree<Key, Pokemon> newTree(size);
-		newTree.inorderScan(PutNodesInTree(pokemonArray),0);
+		newTree.inorderScan(PutNodesInTree(newArray),0);
 		*tree = newTree;
+		for (int i = 0; i < size; i++){
+			delete pokemonArray[i];
+			pokemonArray[i] = NULL;
+			delete newArray[i];
+			newArray[i] = NULL;
+		}
 		free(pokemonArray);
 		free(changeArray);
 		free(stayArray);
@@ -228,15 +248,15 @@ namespace Pokedex{
 			if (trainerID < 0)
 				levelsTree = &pokemonLevelsTree;
 			else {
-				Trainer trainer = Trainer();
+				Trainer* trainer;
 				try {
-					trainer = trainerList.find(IDequals(trainerID));
+					trainer = &trainerList.find(IDequals(trainerID));
 				}
 				catch (ElementNotFound& e) {
 					(void)e;
 					throw Failure();
 				}
-				levelsTree = trainer.getlevelPokemonTree();
+				levelsTree = trainer->getlevelPokemonTree();
 			}
 			*numOfPokemon = levelsTree->getSize();
 			int* pokemonArray = (int*)malloc(*numOfPokemon*sizeof(*pokemonArray));
