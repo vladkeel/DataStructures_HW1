@@ -7,19 +7,14 @@
 
 #ifndef EXCEPTIONS_H_
 #define EXCEPTIONS_H_
-typedef enum {
-	SUCCESS = 0,
-	FAILURE = -1,
-	ALLOCATION_ERROR = -2,
-	INVALID_INPUT = -3
-} ExceptionStatusType;
+#include "library1.h"
 class BaseException : public std::exception{
 private:
-	ExceptionStatusType type;
+	StatusType type;
 public:
 	BaseException() :exception(){};
-	BaseException(ExceptionStatusType type) :exception(), type(type){};
-	ExceptionStatusType getType()const{
+	BaseException(StatusType type) :exception(), type(type){};
+	StatusType getType()const{
 		return type;
 	}
 };

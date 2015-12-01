@@ -8,6 +8,7 @@ void* Init(){
 		return DS;
 	}
 	catch (std::bad_alloc& e){
+		(void)e;
 		return 0;
 	}
 }
@@ -19,11 +20,14 @@ StatusType AddTrainer(void *DS, int trainerID){
 		((PokedexDS*)DS)->addTrainer(trainerID);
 	}
 	catch (BaseException& e){
+		(void)e;
 		return (StatusType)e.getType();
 	}
 	catch (std::bad_alloc& e){
+		(void)e;
 		return (StatusType)ALLOCATION_ERROR;
 	}
+	return SUCCESS;
 
 }
 StatusType CatchPokemon(void *DS, int pokemonID, int trainerID, int level){
@@ -34,11 +38,14 @@ StatusType CatchPokemon(void *DS, int pokemonID, int trainerID, int level){
 		((PokedexDS*)DS)->catchPokemon(pokemonID, trainerID, level);
 	}
 	catch (BaseException& e){
+		(void)e;
 		return (StatusType)e.getType();
 	}
 	catch (std::bad_alloc& e){
+		(void)e;
 		return (StatusType)ALLOCATION_ERROR;
 	}
+	return SUCCESS;
 }
 StatusType FreePokemon(void *DS, int pokemonID){
 	if (!DS){
@@ -48,11 +55,14 @@ StatusType FreePokemon(void *DS, int pokemonID){
 		((PokedexDS*)DS)->freePokemon(pokemonID);
 	}
 	catch (BaseException& e){
+		(void)e;
 		return (StatusType)e.getType();
 	}
 	catch (std::bad_alloc& e){
+		(void)e;
 		return (StatusType)ALLOCATION_ERROR;
 	}
+	return SUCCESS;
 }
 StatusType LevelUp(void *DS, int pokemonID, int levelIncrease){
 	if (!DS){
@@ -62,11 +72,14 @@ StatusType LevelUp(void *DS, int pokemonID, int levelIncrease){
 		((PokedexDS*)DS)->levelUp(pokemonID, levelIncrease);
 	}
 	catch (BaseException& e){
+		(void)e;
 		return (StatusType)e.getType();
 	}
 	catch (std::bad_alloc& e){
+		(void)e;
 		return (StatusType)ALLOCATION_ERROR;
 	}
+	return SUCCESS;
 }
 StatusType EvolvePokemon(void *DS, int pokemonID, int evolvedID){
 	if (!DS){
@@ -77,11 +90,14 @@ StatusType EvolvePokemon(void *DS, int pokemonID, int evolvedID){
 		((PokedexDS*)DS)->evolvePokemon(pokemonID,evolvedID);
 	}
 	catch (BaseException& e){
+		(void)e;
 		return (StatusType)e.getType();
 	}
 	catch (std::bad_alloc& e){
+		(void)e;
 		return (StatusType)ALLOCATION_ERROR;
 	}
+	return SUCCESS;
 }
 StatusType GetTopPokemon(void *DS, int trainerID, int *pokemonID){
 	if (!DS){
@@ -91,11 +107,14 @@ StatusType GetTopPokemon(void *DS, int trainerID, int *pokemonID){
 		*pokemonID = ((PokedexDS*)DS)->getTopPokemon(trainerID);
 	}
 	catch (BaseException& e){
+		(void)e;
 		return (StatusType)e.getType();
 	}
 	catch (std::bad_alloc& e){
+		(void)e;
 		return (StatusType)ALLOCATION_ERROR;
 	}
+	return SUCCESS;
 }
 StatusType GetAllPokemonsByLevel(void *DS, int trainerID, int **pokemons, int *numOfPokemon){
 	if (!DS){
@@ -105,11 +124,14 @@ StatusType GetAllPokemonsByLevel(void *DS, int trainerID, int **pokemons, int *n
 		*pokemons = ((PokedexDS*)DS)->GetAllPokemonsByLevel(trainerID,numOfPokemon);
 	}
 	catch (BaseException& e){
+		(void)e;
 		return (StatusType)e.getType();
 	}
 	catch (std::bad_alloc& e){
+		(void)e;
 		return (StatusType)ALLOCATION_ERROR;
 	}
+	return SUCCESS;
 }
 StatusType UpdateLevels(void *DS, int stoneCode, int stoneFactor){
 	if (!DS){
@@ -120,11 +142,14 @@ StatusType UpdateLevels(void *DS, int stoneCode, int stoneFactor){
 		((PokedexDS*)DS)->UpdateLevels(stoneCode, stoneFactor);
 	}
 	catch (BaseException& e){
+		(void)e;
 		return (StatusType)e.getType();
 	}
 	catch (std::bad_alloc& e){
+		(void)e;
 		return (StatusType)ALLOCATION_ERROR;
 	}
+	return SUCCESS;
 }
 void Quit(void** DS){
 	if (!DS || !(*DS)){

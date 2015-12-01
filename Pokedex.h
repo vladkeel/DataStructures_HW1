@@ -157,6 +157,7 @@ namespace Pokedex{
 				trainer = trainerList.find(finder);
 			}
 			catch (DoesntExist& e) {
+				(void)e;
 				throw Failure();
 			}
 			if (pokemonTreeByID.find(pokemonID) != nullptr)
@@ -235,6 +236,7 @@ namespace Pokedex{
 					trainer = trainerList.find(IDequals(trainerID));
 				}
 				catch (LinkedList::DoesntExist& e) {
+					(void)e;
 					throw Failure();
 				}
 				levelsTree = trainer.getlevelPokemonTree();
