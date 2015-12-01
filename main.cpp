@@ -83,9 +83,17 @@ if ( (read_parameters)!=(required_parameters) ) { printf(ErrorString); return er
 
 	int main(int argc, const char**argv) {
 		char buffer[MAX_STRING_INPUT_SIZE];
-
+		FILE* input = stdin;
+		if (argc == 2){
+			const char* fileName = argv[1];
+			input = fopen(fileName,"r");
+			if (!input){
+				std::cout << "BAD FILE! not cool..." << std::endl;
+				exit(1);
+			}
+		}
 		// Reading commands
-		while (fgets(buffer, MAX_STRING_INPUT_SIZE, stdin) != NULL) {
+		while (fgets(buffer, MAX_STRING_INPUT_SIZE, input) != NULL) {
 			fflush(stdout);
 			if (parser(buffer) == error)
 				break;

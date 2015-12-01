@@ -151,10 +151,10 @@ namespace Pokedex{
 		void catchPokemon(int pokemonID, int trainerID, int level){
 			if (pokemonID <= 0 || trainerID <= 0 || level <= 0)
 				throw InvalidInput();
-			Trainer trainer = Trainer();
+			Trainer* trainer;
 			try {
 				const IDequals finder(trainerID);
-				trainer = trainerList.find(finder);
+				trainer = &trainerList.find(finder);
 			}
 			catch (DoesntExist& e) {
 				(void)e;
@@ -166,10 +166,10 @@ namespace Pokedex{
 			pokemonTreeByID.insert(pokemonID, pokemon);
 			Key k(level, pokemonID);
 			pokemonLevelsTree.insert(k, pokemon);
-			trainer.getlevelPokemonTree()->insert(k, pokemon);
-			trainer.getPokemonTreeByID()->insert(pokemonID, pokemon);
+			trainer->getlevelPokemonTree()->insert(k, pokemon);
+			trainer->getPokemonTreeByID()->insert(pokemonID, pokemon);
 			updateMaxLevel();
-			trainer.updateMaxLevel();
+			trainer->updateMaxLevel();
 		}
 	void freePokemon(int pokemonID){
 		if(pokemonID <= 0)
@@ -189,9 +189,9 @@ namespace Pokedex{
 
 		//removing from TrainersList
 
-		Trainer trainer = trainerList.find(IDequals(trainerTemp)); // has to be there
-		trainer.getPokemonTreeByID()->remove(pokemonID);
-		trainer.getlevelPokemonTree()->remove(temp);
+		Trainer* trainer = &trainerList.find(IDequals(trainerTemp)); // has to be there
+		trainer->getPokemonTreeByID()->remove(pokemonID);
+		trainer->getlevelPokemonTree()->remove(temp);
 		updateMaxLevel(trainerTemp);
 	}
 	void levelUp(int pokemonID, int levelIncrease){
