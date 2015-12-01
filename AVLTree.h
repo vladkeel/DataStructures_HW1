@@ -16,9 +16,13 @@ namespace AVL{
 		else if (size == 1){
 			return new Node<N, M>();
 		}
+		double tempCalcLeft = double(size - 1) / 2;
+		double tempCalcRight = double(size - 1) / 2;
+		int leftSize = (int)ceil(tempCalcLeft);
+		int rightSize = (int)floor(tempCalcRight);
 		Node<N, M>* newNode = new Node<N, M>();
-		newNode->left = buildEmpty<N,M>((int)ceil((size-1)/2));
-		newNode->right = buildEmpty<N,M>((int)floor((size - 1) / 2));
+		newNode->left = buildEmpty<N,M>(leftSize);
+		newNode->right = buildEmpty<N,M>(rightSize);
 		newNode->updateHeight();
 		return newNode;
 	}
