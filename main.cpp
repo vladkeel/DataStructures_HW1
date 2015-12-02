@@ -98,6 +98,8 @@ if ( (read_parameters)!=(required_parameters) ) { printf(ErrorString); return er
 			if (parser(buffer) == error)
 				break;
 		};
+		if (input != stdin)
+			fclose(input);
 		return 0;
 	}
 
