@@ -39,10 +39,10 @@ namespace AVL{
 			int heightRight = right ? right->height : -1;
 			height = std::max<int>(heightLeft, heightRight) + 1;
 		}
-		Node<S, T>* removeMin(){
+		Node<S, T>* newRoot(){
 			if (!left)
 				return right;
-			left = left->removeMin();
+			left = left->newRoot();
 			return balance();
 		}
 		int balanceFactor(){
@@ -80,7 +80,7 @@ namespace AVL{
 					right = right->rotateRight();
 				return rotateLeft();
 			}
-			return this; // no balance needed
+			return this;
 		}
 	protected:
 		Node<S, T>* copyNode(){
@@ -170,7 +170,7 @@ namespace AVL{
 				delete this;
 				if (!rightTemp) return leftTemp;
 				Node* min = rightTemp->findMin();
-				min->right = rightTemp->removeMin();
+				min->right = rightTemp->newRoot();
 				min->left = leftTemp;
 				return min->balance();
 			}
