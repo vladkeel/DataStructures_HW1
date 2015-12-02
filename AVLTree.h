@@ -42,7 +42,7 @@ namespace AVL{
 		Node<S, T>* removeMin(){
 			if (!left)
 				return right;
-			left = removeMin();
+			left = left->removeMin();
 			return balance();
 		}
 		int balanceFactor(){
