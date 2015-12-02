@@ -38,11 +38,7 @@ public:
 	bool operator==(const Trainer& other)const{
 		return (trainerID == other.trainerID);
 	}
-	~Trainer(){
-		if (maxLevel){
-			delete maxLevel;
-		}
-	}
+	~Trainer(){};
 	int getID()const{
 		return trainerID;
 	}

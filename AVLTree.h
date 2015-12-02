@@ -4,14 +4,13 @@
 #include <stdlib.h>
 #include "Exceptions.h"
 #include <math.h>
-#define nullptr NULL
 
 namespace AVL{
 	template <class S, class T> class Node;
 	template <class N, class M>
 	Node<N,M>* buildEmpty(int size){
 		if (size == 0){
-			return nullptr;
+			return NULL;
 		}
 		else if (size == 1){
 			return new Node<N, M>();
@@ -84,13 +83,6 @@ namespace AVL{
 			return this; // no balance needed
 		}
 	protected:
-		void killNode(){
-			if (left)
-				left->killNode();
-			if (right)
-				right->killNode();
-			delete this;
-		}
 		Node<S, T>* copyNode(){
 			Node<S, T>* newNode = new Node<S, T>(*this);
 			newNode->key = key;
@@ -110,7 +102,10 @@ namespace AVL{
 		Node(const Node<S, T>& copyN) :key(copyN.key), data(copyN.data), height(0), left(0), right(0){};
 		Node<S, T>& operator=(const Node<S, T>& copyN){
 			if (this != &copyN){
-				killNode();
+				if (left)
+					delete left;
+				if (right)
+					delete right;
 				key = copyN.key;
 				data = copyN.data;
 				left = 0;
@@ -119,7 +114,12 @@ namespace AVL{
 			}
 			return *this;
 		}
-		~Node<S, T>(){};
+		~Node<S, T>(){
+			if (left)
+				delete left;
+			if (right)
+				delete right;
+		};
 		int getHeight()const{
 			return height;
 		}
@@ -165,6 +165,8 @@ namespace AVL{
 			else if (k == key){
 				Node* leftTemp = left;
 				Node* rightTemp = right;
+				left = 0;
+				right = 0;
 				delete this;
 				if (!rightTemp) return leftTemp;
 				Node* min = rightTemp->findMin();
@@ -186,7 +188,7 @@ namespace AVL{
 				return right->find(k);
 			if (k < key && left)
 				return left->find(k);
-			return nullptr;
+			return NULL;
 		}
 		template <typename actionT> void inorderScan(actionT action, int* iterator){
 			if (left){
@@ -217,7 +219,7 @@ namespace AVL{
 		Tree& operator=(const Tree& tree){
 			if (this != &tree){
 				if (root)
-					root->killNode();
+					delete root;
 				root = tree.root? tree.root->copyNode() : 0;
 				size = tree.size;
 			}
@@ -225,7 +227,7 @@ namespace AVL{
 		};
 		~Tree(){
 			if (root)
-				root->killNode();
+				delete root;
 		}
 		int getSize(){
 			return size;

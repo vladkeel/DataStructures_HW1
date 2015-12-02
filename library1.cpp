@@ -155,6 +155,6 @@ void Quit(void** DS){
 	if (!DS || !(*DS)){
 		return;
 	}
-	delete *DS;
+	delete (PokedexDS*)*DS;
 	*DS = NULL;
 }

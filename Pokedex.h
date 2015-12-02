@@ -155,10 +155,7 @@ namespace Pokedex{
 			pokemonTreeByID = AVL::Tree<int, Pokemon>();
 			pokemonLevelsTree = AVL::Tree<Key, Pokemon>();
 		}
-		~PokedexDS(){
-			if (maxLevel)
-				delete maxLevel;
-		}
+		~PokedexDS(){};
 		void addTrainer(int trainerID){
 			if(trainerID <= 0)
 				throw InvalidInput();
@@ -179,7 +176,7 @@ namespace Pokedex{
 				(void)e;
 				throw Failure();
 			}
-			if (pokemonTreeByID.find(pokemonID) != nullptr)
+			if (pokemonTreeByID.find(pokemonID) != NULL)
 				throw Failure();
 			Pokemon pokemon(pokemonID, level, trainerID);
 			pokemonTreeByID.insert(pokemonID, pokemon);
